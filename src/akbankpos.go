@@ -105,8 +105,8 @@ type B2b struct {
 type Card struct {
 	CardHolderName *string `json:"cardHolderName,omitempty"`
 	CardNumber     *string `json:"cardNumber,omitempty"`
-	CardExpiry     *string `json:"expireDate,omitempty"`
 	CardCode       *string `json:"cvv2,omitempty"`
+	CardExpiry     *string `json:"expireDate,omitempty"`
 }
 
 type Customer struct {
@@ -159,8 +159,8 @@ type SubMerchant struct {
 }
 
 type Terminal struct {
-	TerminalSafeId *string `json:"terminalSafeId,omitempty"`
 	MerchantSafeId *string `json:"merchantSafeId,omitempty"`
+	TerminalSafeId *string `json:"terminalSafeId,omitempty"`
 }
 
 type Campaign struct {
@@ -374,6 +374,9 @@ func (api *API) Auth(ctx context.Context, req *Request) (Response, error) {
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
 	req.TxnCode = &txnCode
+	req.Reward.CcbRewardAmount = new(float32)
+	req.Reward.PcbRewardAmount = new(float32)
+	req.Reward.XcbRewardAmount = new(float32)
 	return api.Transaction(ctx, req)
 }
 
