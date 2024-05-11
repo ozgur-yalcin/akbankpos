@@ -37,14 +37,6 @@ var CurrencyCode = map[string]int{
 	"JPY": 392,
 }
 
-var CurrencyISO = map[string]string{
-	"949": "TRY",
-	"840": "USD",
-	"978": "EUR",
-	"826": "GBP",
-	"392": "JPY",
-}
-
 type API struct {
 	Mode      string
 	SecretKey string
