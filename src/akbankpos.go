@@ -14,7 +14,7 @@ import (
 )
 
 var EndPoints = map[string]string{
-	"TEST":   "https://apitest.akbank.com",
+	"TEST":   "https://apipre.akbank.com",
 	"TEST3D": "https://virtualpospaymentgatewaypre.akbank.com/securepay",
 
 	"PROD":   "https://api.akbank.com",
