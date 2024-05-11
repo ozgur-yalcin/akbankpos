@@ -343,13 +343,24 @@ func reflector(values url.Values, val reflect.Value) error {
 		if n, ok := sf.Tag.Lookup("form"); ok {
 			ts := strings.Split(n, ",")
 			name := ts[0]
-			value := String(sv)
-			if len(ts) > 1 && ts[1] == "omitempty" && value != "" {
-				values.Add(name, value)
-			} else if len(ts) > 1 && ts[1] != "omitempty" {
-				values.Add(name, value)
-			} else if len(ts) == 1 {
-				values.Add(name, value)
+			if sv.Kind() == reflect.Float32 {
+				value := fmt.Sprintf("%.2f", sv.Interface())
+				if len(ts) > 1 && ts[1] == "omitempty" && value != "" {
+					values.Add(name, value)
+				} else if len(ts) > 1 && ts[1] != "omitempty" {
+					values.Add(name, value)
+				} else if len(ts) == 1 {
+					values.Add(name, value)
+				}
+			} else {
+				value := String(sv)
+				if len(ts) > 1 && ts[1] == "omitempty" && value != "" {
+					values.Add(name, value)
+				} else if len(ts) > 1 && ts[1] != "omitempty" {
+					values.Add(name, value)
+				} else if len(ts) == 1 {
+					values.Add(name, value)
+				}
 			}
 		}
 	}
