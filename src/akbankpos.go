@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -449,22 +450,25 @@ func (req *Request) SetCardCode(cardcode string) {
 	req.Card.CardCode = &cardcode
 }
 
-func (req *Request) SetAmount(amount float, currency string) {
+func (req *Request) SetAmount(price, currency string) {
 	if req.Transaction == nil {
 		req.Transaction = new(Transaction)
 	}
-	motoInd := 0
-	code := CurrencyCode[currency]
-	req.Transaction.Amount = &amount
-	req.Transaction.Currency = &code
-	req.Transaction.MotoInd = &motoInd
+	if parse, err := strconv.ParseFloat(price, 32); err == nil {
+		amount := float(parse)
+		code := CurrencyCode[currency]
+		req.Transaction.Amount = &amount
+		req.Transaction.Currency = &code
+	}
 }
 
-func (req *Request) SetInstallment(installment int) {
+func (req *Request) SetInstallment(installment string) {
 	if req.Transaction == nil {
 		req.Transaction = new(Transaction)
 	}
-	req.Transaction.Installment = &installment
+	if parse, err := strconv.Atoi(installment); err == nil {
+		req.Transaction.Installment = &parse
+	}
 }
 
 func (req *Request) SetCustomerIPv4(ipaddress string) {
@@ -492,9 +496,11 @@ func (api *API) PreAuth(ctx context.Context, req *Request) (Response, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
 	rnd := api.Random(128)
 	code := "1004"
+	motoInd := 0
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
 	req.TxnCode = &code
+	req.Transaction.MotoInd = &motoInd
 	return api.Transaction(ctx, req)
 }
 
@@ -502,9 +508,11 @@ func (api *API) Auth(ctx context.Context, req *Request) (Response, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
 	rnd := api.Random(128)
 	code := "1000"
+	motoInd := 0
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
 	req.TxnCode = &code
+	req.Transaction.MotoInd = &motoInd
 	req.Reward = new(Reward)
 	req.Reward.CcbRewardAmount = new(float)
 	req.Reward.PcbRewardAmount = new(float)
