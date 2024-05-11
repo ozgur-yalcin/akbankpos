@@ -347,7 +347,8 @@ func (req *Request) SetCardNumber(cardnumber string) {
 	req.Card.CardNumber = &cardnumber
 }
 
-func (req *Request) SetCardExpiry(cardexpiry string) {
+func (req *Request) SetCardExpiry(cardmonth, cardyear string) {
+	cardexpiry := cardmonth + cardyear
 	req.Card.CardExpiry = &cardexpiry
 }
 
