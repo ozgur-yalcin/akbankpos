@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"time"
@@ -85,8 +86,8 @@ type Response struct {
 	Interest                 *Interest             `json:"interest,omitempty"`
 	SubMerchant              *SubMerchant          `json:"subMerchant,omitempty"`
 	B2b                      *B2b                  `json:"b2b,omitempty"`
-	LinkValidTerm            *float32              `json:"linkValidTerm,omitempty"`
-	MerchantId               *float32              `json:"merchantId,omitempty"`
+	LinkValidTerm            *float                `json:"linkValidTerm,omitempty"`
+	MerchantId               *float                `json:"merchantId,omitempty"`
 	LinkExpireDate           *string               `json:"linkExpireDate,omitempty"`
 	MerchantOrderId          *string               `json:"merchantOrderId,omitempty"`
 	ReferenceId              *string               `json:"referenceId,omitempty"`
@@ -151,7 +152,7 @@ type SecureTransaction struct {
 }
 
 type Sgk struct {
-	SurchargeAmount *float32 `json:"surchargeAmount,omitempty"`
+	SurchargeAmount *float `json:"surchargeAmount,omitempty"`
 }
 
 type SubMerchant struct {
@@ -175,98 +176,98 @@ type Header struct {
 }
 
 type InstallmentCond struct {
-	InstallmentCount *float32 `json:"installmentCount,omitempty"`
-	InstallmentType  *string  `json:"installmentType,omitempty"`
-	CardType         *string  `json:"cardType,omitempty"`
+	InstallmentCount *float  `json:"installmentCount,omitempty"`
+	InstallmentType  *string `json:"installmentType,omitempty"`
+	CardType         *string `json:"cardType,omitempty"`
 }
 
 type Interest struct {
-	InterestRate   *float32 `json:"interestRate,omitempty"`
-	InterestAmount *float32 `json:"interestAmount,omitempty"`
+	InterestRate   *float `json:"interestRate,omitempty"`
+	InterestAmount *float `json:"interestAmount,omitempty"`
 }
 
 type LinkDetail struct {
-	LinkTransferType  *string  `json:"linkTransferType,omitempty"`
-	MobilePhoneNumber *string  `json:"mobilePhoneNumber,omitempty"`
-	Email             *string  `json:"email,omitempty"`
-	LinkValidTerm     *float32 `json:"linkValidTerm,omitempty"`
-	Amount            *float32 `json:"amount,omitempty"`
-	Currency          *int     `json:"currencyCode,omitempty"`
-	InstallmentCount  *float32 `json:"installmentCount,omitempty"`
-	ReferenceId       *string  `json:"referenceId,omitempty"`
-	ErrorCode         *string  `json:"errorCode,omitempty"`
-	ErrorMessage      *string  `json:"errorMessage,omitempty"`
-	LinkExpireDate    *string  `json:"linkExpireDate,omitempty"`
-	LinkStatus        *string  `json:"linkStatus,omitempty"`
-	InstallmentType   *float32 `json:"installmentType,omitempty"`
+	LinkTransferType  *string `json:"linkTransferType,omitempty"`
+	MobilePhoneNumber *string `json:"mobilePhoneNumber,omitempty"`
+	Email             *string `json:"email,omitempty"`
+	LinkValidTerm     *float  `json:"linkValidTerm,omitempty"`
+	Amount            *float  `json:"amount,omitempty"`
+	Currency          *int    `json:"currencyCode,omitempty"`
+	InstallmentCount  *float  `json:"installmentCount,omitempty"`
+	ReferenceId       *string `json:"referenceId,omitempty"`
+	ErrorCode         *string `json:"errorCode,omitempty"`
+	ErrorMessage      *string `json:"errorMessage,omitempty"`
+	LinkExpireDate    *string `json:"linkExpireDate,omitempty"`
+	LinkStatus        *string `json:"linkStatus,omitempty"`
+	InstallmentType   *float  `json:"installmentType,omitempty"`
 }
 
 type Reward struct {
-	CcbRewardAmount        *float32 `json:"ccbRewardAmount,omitempty"`
-	PcbRewardAmount        *float32 `json:"pcbRewardAmount,omitempty"`
-	XcbRewardAmount        *float32 `json:"xcbRewardAmount,omitempty"`
-	CcbEarnedRewardAmount  *float32 `json:"ccbEarnedRewardAmount,omitempty"`
-	CcbBalanceRewardAmount *float32 `json:"ccbBalanceRewardAmount,omitempty"`
-	CcbRewardDesc          *string  `json:"ccbRewardDesc,omitempty"`
-	PcbEarnedRewardAmount  *float32 `json:"pcbEarnedRewardAmount,omitempty"`
-	PcbBalanceRewardAmount *float32 `json:"pcbBalanceRewardAmount,omitempty"`
-	PcbRewardDesc          *string  `json:"pcbRewardDesc,omitempty"`
-	XcbEarnedRewardAmount  *float32 `json:"xcbEarnedRewardAmount,omitempty"`
-	XcbBalanceRewardAmount *float32 `json:"xcbBalanceRewardAmount,omitempty"`
-	XcbRewardDesc          *string  `json:"xcbRewardDesc,omitempty"`
+	CcbRewardAmount        *float  `json:"ccbRewardAmount,omitempty"`
+	PcbRewardAmount        *float  `json:"pcbRewardAmount,omitempty"`
+	XcbRewardAmount        *float  `json:"xcbRewardAmount,omitempty"`
+	CcbEarnedRewardAmount  *float  `json:"ccbEarnedRewardAmount,omitempty"`
+	CcbBalanceRewardAmount *float  `json:"ccbBalanceRewardAmount,omitempty"`
+	CcbRewardDesc          *string `json:"ccbRewardDesc,omitempty"`
+	PcbEarnedRewardAmount  *float  `json:"pcbEarnedRewardAmount,omitempty"`
+	PcbBalanceRewardAmount *float  `json:"pcbBalanceRewardAmount,omitempty"`
+	PcbRewardDesc          *string `json:"pcbRewardDesc,omitempty"`
+	XcbEarnedRewardAmount  *float  `json:"xcbEarnedRewardAmount,omitempty"`
+	XcbBalanceRewardAmount *float  `json:"xcbBalanceRewardAmount,omitempty"`
+	XcbRewardDesc          *string `json:"xcbRewardDesc,omitempty"`
 }
 
 type Transaction struct {
-	Amount      *float32 `json:"amount,omitempty"`
-	Currency    *int     `json:"currencyCode,omitempty"`
-	MotoInd     *int     `json:"motoInd,omitempty"`
-	Installment *int     `json:"installCount,omitempty"`
-	AuthCode    *string  `json:"authCode,omitempty"`
-	Rrn         *string  `json:"rrn,omitempty"`
-	BatchNumber *int     `json:"batchNumber,omitempty"`
-	Stan        *int     `json:"stan,omitempty"`
+	Amount      *float  `json:"amount,omitempty"`
+	Currency    *int    `json:"currencyCode,omitempty"`
+	MotoInd     *int    `json:"motoInd,omitempty"`
+	Installment *int    `json:"installCount,omitempty"`
+	AuthCode    *string `json:"authCode,omitempty"`
+	Rrn         *string `json:"rrn,omitempty"`
+	BatchNumber *int    `json:"batchNumber,omitempty"`
+	Stan        *int    `json:"stan,omitempty"`
 }
 
 type TxnDetailListInner struct {
-	TxnCode                    *string  `json:"txnCode,omitempty"`
-	ResponseCode               *string  `json:"responseCode,omitempty"`
-	ResponseMessage            *string  `json:"responseMessage,omitempty"`
-	HostResponseCode           *string  `json:"hostResponseCode,omitempty"`
-	HostMessage                *string  `json:"hostMessage,omitempty"`
-	TxnDateTime                *string  `json:"txnDateTime,omitempty"`
-	PlannedDateTime            *string  `json:"plannedDateTime,omitempty"`
-	TerminalSafeId             *string  `json:"terminalSafeId,omitempty"`
-	MerchantSafeId             *string  `json:"merchantSafeId,omitempty"`
-	OrderId                    *string  `json:"orderId,omitempty"`
-	OrderTrackId               *string  `json:"orderTrackId,omitempty"`
-	AuthCode                   *string  `json:"authCode,omitempty"`
-	Rrn                        *string  `json:"rrn,omitempty"`
-	BatchNumber                *int     `json:"batchNumber,omitempty"`
-	Stan                       *int     `json:"stan,omitempty"`
-	SettlementId               *string  `json:"settlementId,omitempty"`
-	TxnStatus                  *string  `json:"txnStatus,omitempty"`
-	Amount                     *float32 `json:"amount,omitempty"`
-	Currency                   *int     `json:"currencyCode,omitempty"`
-	MotoInd                    *int     `json:"motoInd,omitempty"`
-	Installment                *int     `json:"installCount,omitempty"`
-	CcbRewardAmount            *float32 `json:"ccbRewardAmount,omitempty"`
-	PcbRewardAmount            *float32 `json:"pcbRewardAmount,omitempty"`
-	XcbRewardAmount            *float32 `json:"xcbRewardAmount,omitempty"`
-	PreAuthStatus              *string  `json:"preAuthStatus,omitempty"`
-	PreAuthCloseAmount         *float32 `json:"preAuthCloseAmount,omitempty"`
-	PreAuthPartialCancelAmount *float32 `json:"preAuthPartialCancelAmount,omitempty"`
-	PreAuthCloseDate           *string  `json:"preAuthCloseDate,omitempty"`
-	MaskedCardNumber           *string  `json:"maskedCardNumber,omitempty"`
-	RecurringOrder             *int     `json:"recurringOrder,omitempty"`
-	RequestType                *string  `json:"requestType,omitempty"`
-	RequestStatus              *string  `json:"requestStatus,omitempty"`
-	CancelDate                 *string  `json:"cancelDate,omitempty"`
-	TryCount                   *int     `json:"tryCount,omitempty"`
-	Xid                        *string  `json:"xid,omitempty"`
-	PaymentModel               *string  `json:"paymentModel,omitempty"`
-	Eci                        *string  `json:"eci,omitempty"`
-	SecureData                 *string  `json:"secureData,omitempty"`
-	OrgOrderId                 *string  `json:"orgOrderId,omitempty"`
+	TxnCode                    *string `json:"txnCode,omitempty"`
+	ResponseCode               *string `json:"responseCode,omitempty"`
+	ResponseMessage            *string `json:"responseMessage,omitempty"`
+	HostResponseCode           *string `json:"hostResponseCode,omitempty"`
+	HostMessage                *string `json:"hostMessage,omitempty"`
+	TxnDateTime                *string `json:"txnDateTime,omitempty"`
+	PlannedDateTime            *string `json:"plannedDateTime,omitempty"`
+	TerminalSafeId             *string `json:"terminalSafeId,omitempty"`
+	MerchantSafeId             *string `json:"merchantSafeId,omitempty"`
+	OrderId                    *string `json:"orderId,omitempty"`
+	OrderTrackId               *string `json:"orderTrackId,omitempty"`
+	AuthCode                   *string `json:"authCode,omitempty"`
+	Rrn                        *string `json:"rrn,omitempty"`
+	BatchNumber                *int    `json:"batchNumber,omitempty"`
+	Stan                       *int    `json:"stan,omitempty"`
+	SettlementId               *string `json:"settlementId,omitempty"`
+	TxnStatus                  *string `json:"txnStatus,omitempty"`
+	Amount                     *float  `json:"amount,omitempty"`
+	Currency                   *int    `json:"currencyCode,omitempty"`
+	MotoInd                    *int    `json:"motoInd,omitempty"`
+	Installment                *int    `json:"installCount,omitempty"`
+	CcbRewardAmount            *float  `json:"ccbRewardAmount,omitempty"`
+	PcbRewardAmount            *float  `json:"pcbRewardAmount,omitempty"`
+	XcbRewardAmount            *float  `json:"xcbRewardAmount,omitempty"`
+	PreAuthStatus              *string `json:"preAuthStatus,omitempty"`
+	PreAuthCloseAmount         *float  `json:"preAuthCloseAmount,omitempty"`
+	PreAuthPartialCancelAmount *float  `json:"preAuthPartialCancelAmount,omitempty"`
+	PreAuthCloseDate           *string `json:"preAuthCloseDate,omitempty"`
+	MaskedCardNumber           *string `json:"maskedCardNumber,omitempty"`
+	RecurringOrder             *int    `json:"recurringOrder,omitempty"`
+	RequestType                *string `json:"requestType,omitempty"`
+	RequestStatus              *string `json:"requestStatus,omitempty"`
+	CancelDate                 *string `json:"cancelDate,omitempty"`
+	TryCount                   *int    `json:"tryCount,omitempty"`
+	Xid                        *string `json:"xid,omitempty"`
+	PaymentModel               *string `json:"paymentModel,omitempty"`
+	Eci                        *string `json:"eci,omitempty"`
+	SecureData                 *string `json:"secureData,omitempty"`
+	OrgOrderId                 *string `json:"orgOrderId,omitempty"`
 }
 
 type Error struct {
@@ -278,6 +279,12 @@ type Error struct {
 type Errors struct {
 	Code    string `json:"code,omitempty"`
 	Message string `json:"message,omitempty"`
+}
+
+type float float32
+
+func (f float) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("%.2f", float32(f))), nil
 }
 
 func Random(n int) string {
@@ -309,7 +316,7 @@ func Api(merchantid, terminalid, secretkey string) (*API, *Request) {
 	req.Transaction = new(Transaction)
 	req.Customer = new(Customer)
 	req.Reward = new(Reward)
-	version := "1.0"
+	version := "1.00"
 	req.Version = &version
 	req.Terminal.MerchantSafeId = &merchantid
 	req.Terminal.TerminalSafeId = &terminalid
@@ -333,7 +340,7 @@ func (req *Request) SetCardCode(cardcode string) {
 	req.Card.CardCode = &cardcode
 }
 
-func (req *Request) SetAmount(amount float32, currency string) {
+func (req *Request) SetAmount(amount float, currency string) {
 	motoInd := 0
 	code := CurrencyCode[currency]
 	req.Transaction.MotoInd = &motoInd
@@ -374,9 +381,9 @@ func (api *API) Auth(ctx context.Context, req *Request) (Response, error) {
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
 	req.TxnCode = &txnCode
-	req.Reward.CcbRewardAmount = new(float32)
-	req.Reward.PcbRewardAmount = new(float32)
-	req.Reward.XcbRewardAmount = new(float32)
+	req.Reward.CcbRewardAmount = new(float)
+	req.Reward.PcbRewardAmount = new(float)
+	req.Reward.XcbRewardAmount = new(float)
 	return api.Transaction(ctx, req)
 }
 
