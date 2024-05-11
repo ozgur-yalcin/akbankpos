@@ -9,6 +9,18 @@ import (
 	"time"
 )
 
+var EndPoints = map[string]string{
+	"TEST": "https://apitest.akbank.com",
+	"PROD": "https://api.akbank.com",
+}
+
+type API struct {
+	Mode       string
+	MerchantId string
+	TerminalId string
+	SecretKey  string
+}
+
 type Request struct {
 	Version           *string            `json:"version,omitempty"`
 	HashItems         *string            `json:"hashItems,omitempty"`
@@ -290,4 +302,17 @@ func D64(data string) []byte {
 		return nil
 	}
 	return b
+}
+
+func Api(merchantid, terminalid, secretkey string) (*API, *Request) {
+	api := new(API)
+	api.MerchantId = merchantid
+	api.TerminalId = terminalid
+	api.SecretKey = secretkey
+	request := new(Request)
+	return api, request
+}
+
+func (api *API) SetMode(mode string) {
+	api.Mode = mode
 }
