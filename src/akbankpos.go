@@ -61,8 +61,8 @@ type Request struct {
 	PayByLink         *PayByLink         `json:"payByLink,omitempty"`
 	SecureTransaction *SecureTransaction `json:"secureTransaction,omitempty"`
 	SubMerchant       *SubMerchant       `json:"subMerchant,omitempty"`
-	B2b               *B2b               `json:"b2b,omitempty"`
-	Sgk               *Sgk               `json:"sgk,omitempty"`
+	B2B               *B2B               `json:"b2b,omitempty"`
+	SGK               *SGK               `json:"sgk,omitempty"`
 }
 
 type Response struct {
@@ -83,7 +83,7 @@ type Response struct {
 	PlannedDate              *PlannedDate          `json:"plannedDate,omitempty"`
 	Interest                 *Interest             `json:"interest,omitempty"`
 	SubMerchant              *SubMerchant          `json:"subMerchant,omitempty"`
-	B2b                      *B2b                  `json:"b2b,omitempty"`
+	B2B                      *B2B                  `json:"b2b,omitempty"`
 	LinkValidTerm            *float                `json:"linkValidTerm,omitempty"`
 	MerchantId               *float                `json:"merchantId,omitempty"`
 	LinkExpireDate           *string               `json:"linkExpireDate,omitempty"`
@@ -97,7 +97,7 @@ type Response struct {
 	Error                    *Error                `json:"error,omitempty"`
 }
 
-type B2b struct {
+type B2B struct {
 	IdentityNumber *string `json:"identityNumber,omitempty"`
 }
 
@@ -149,7 +149,7 @@ type SecureTransaction struct {
 	SecureMd      *string `json:"secureMd,omitempty"`
 }
 
-type Sgk struct {
+type SGK struct {
 	SurchargeAmount *float `json:"surchargeAmount,omitempty"`
 }
 
