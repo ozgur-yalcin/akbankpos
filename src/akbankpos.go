@@ -3,12 +3,11 @@ package akbankpos
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -293,35 +292,10 @@ func Random(n int) string {
 	return string(bytes)
 }
 
-func HEX(data string) (hash string) {
-	b, err := hex.DecodeString(data)
-	if err != nil {
-		log.Println(err)
-		return hash
-	}
-	hash = string(b)
-	return hash
-}
-
-func SHA512(data string) (hash string) {
-	h := sha512.New()
-	h.Write([]byte(data))
-	hash = hex.EncodeToString(h.Sum(nil))
-	return hash
-}
-
-func B64(data string) (hash string) {
-	hash = base64.StdEncoding.EncodeToString([]byte(data))
-	return hash
-}
-
-func D64(data string) []byte {
-	b, err := base64.StdEncoding.DecodeString(data)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	return b
+func Hash(payload []byte, secretkey string) string {
+	hmac := hmac.New(sha512.New, []byte(secretkey))
+	hmac.Write(payload)
+	return base64.StdEncoding.EncodeToString(hmac.Sum(nil))
 }
 
 func Api(merchantid, terminalid, secretkey string) (*API, *Request) {
@@ -443,6 +417,7 @@ func (api *API) Transaction(ctx context.Context, req *Request) (res Response, er
 		return res, err
 	}
 	request.Header.Set("Content-Type", "application/json; charset=utf-8")
+	request.Header.Set("auth-hash", Hash(payload, api.SecretKey))
 	client := new(http.Client)
 	response, err := client.Do(request)
 	if err != nil {
