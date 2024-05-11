@@ -11,6 +11,9 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/url"
+	"reflect"
+	"strings"
 	"time"
 )
 
@@ -41,13 +44,13 @@ type API struct {
 type Request struct {
 	Version           *string            `json:"version,omitempty"`
 	HashItems         *string            `json:"hashItems,omitempty"`
-	Lang              *string            `json:"lang,omitempty"`
-	OkUrl             *string            `json:"okUrl,omitempty"`
-	FailUrl           *string            `json:"failUrl,omitempty"`
-	TxnCode           *string            `json:"txnCode,omitempty"`
-	PaymentModel      *string            `json:"paymentModel,omitempty"`
-	RequestDateTime   *string            `json:"requestDateTime,omitempty"`
-	RandomNumber      *string            `json:"randomNumber,omitempty"`
+	Lang              *string            `json:"lang,omitempty" form:"lang,omitempty"`
+	OkUrl             *string            `json:"okUrl,omitempty" form:"okUrl,omitempty"`
+	FailUrl           *string            `json:"failUrl,omitempty" form:"failUrl,omitempty"`
+	TxnCode           *string            `json:"txnCode,omitempty" form:"txnCode,omitempty"`
+	PaymentModel      *string            `json:"paymentModel,omitempty" form:"paymentModel,omitempty"`
+	RequestDateTime   *string            `json:"requestDateTime,omitempty" form:"requestDateTime,omitempty"`
+	RandomNumber      *string            `json:"randomNumber,omitempty" form:"randomNumber,omitempty"`
 	InstitutionCode   *string            `json:"institutionCode,omitempty"`
 	Terminal          *Terminal          `json:"terminal,omitempty"`
 	Card              *Card              `json:"card,omitempty"`
@@ -63,6 +66,7 @@ type Request struct {
 	SubMerchant       *SubMerchant       `json:"subMerchant,omitempty"`
 	B2B               *B2B               `json:"b2b,omitempty"`
 	SGK               *SGK               `json:"sgk,omitempty"`
+	Hash              *string            `form:"hash,omitempty"`
 }
 
 type Response struct {
@@ -98,18 +102,18 @@ type Response struct {
 }
 
 type B2B struct {
-	IdentityNumber *string `json:"identityNumber,omitempty"`
+	IdentityNumber *string `json:"identityNumber,omitempty" form:"b2bIdentityNumber,omitempty"`
 }
 
 type Card struct {
 	CardHolderName *string `json:"cardHolderName,omitempty"`
-	CardNumber     *string `json:"cardNumber,omitempty"`
-	CardCode       *string `json:"cvv2,omitempty"`
-	CardExpiry     *string `json:"expireDate,omitempty"`
+	CardNumber     *string `json:"cardNumber,omitempty" form:"creditCard,omitempty"`
+	CardCode       *string `json:"cvv2,omitempty" form:"cvv,omitempty"`
+	CardExpiry     *string `json:"expireDate,omitempty" form:"expiredDate,omitempty"`
 }
 
 type Customer struct {
-	EmailAddress *string `json:"emailAddress,omitempty"`
+	EmailAddress *string `json:"emailAddress,omitempty" form:"emailAddress,omitempty"`
 	IpAddress    *string `json:"ipAddress,omitempty"`
 }
 
@@ -120,7 +124,7 @@ type InsurancePan struct {
 }
 
 type Order struct {
-	OrderId      *string `json:"orderId,omitempty"`
+	OrderId      *string `json:"orderId,omitempty" form:"orderId,omitempty"`
 	OrderTrackId *string `json:"orderTrackId,omitempty"`
 }
 
@@ -154,12 +158,12 @@ type SGK struct {
 }
 
 type SubMerchant struct {
-	SubMerchantId *string `json:"subMerchantId,omitempty"`
+	SubMerchantId *string `json:"subMerchantId,omitempty" form:"subMerchantId,omitempty"`
 }
 
 type Terminal struct {
-	MerchantSafeId *string `json:"merchantSafeId,omitempty"`
-	TerminalSafeId *string `json:"terminalSafeId,omitempty"`
+	MerchantSafeId *string `json:"merchantSafeId,omitempty" form:"merchantSafeId,omitempty"`
+	TerminalSafeId *string `json:"terminalSafeId,omitempty" form:"terminalSafeId,omitempty"`
 }
 
 type Campaign struct {
@@ -201,9 +205,9 @@ type LinkDetail struct {
 }
 
 type Reward struct {
-	CcbRewardAmount        *float  `json:"ccbRewardAmount,omitempty"`
-	PcbRewardAmount        *float  `json:"pcbRewardAmount,omitempty"`
-	XcbRewardAmount        *float  `json:"xcbRewardAmount,omitempty"`
+	CcbRewardAmount        *float  `json:"ccbRewardAmount,omitempty" form:"ccbRewardAmount,omitempty"`
+	PcbRewardAmount        *float  `json:"pcbRewardAmount,omitempty" form:"pcbRewardAmount,omitempty"`
+	XcbRewardAmount        *float  `json:"xcbRewardAmount,omitempty" form:"xcbRewardAmount,omitempty"`
 	CcbEarnedRewardAmount  *float  `json:"ccbEarnedRewardAmount,omitempty"`
 	CcbBalanceRewardAmount *float  `json:"ccbBalanceRewardAmount,omitempty"`
 	CcbRewardDesc          *string `json:"ccbRewardDesc,omitempty"`
@@ -216,10 +220,10 @@ type Reward struct {
 }
 
 type Transaction struct {
-	Amount      *float  `json:"amount,omitempty"`
-	Currency    *int    `json:"currencyCode,omitempty"`
+	Amount      *float  `json:"amount,omitempty" form:"amount,omitempty"`
+	Currency    *int    `json:"currencyCode,omitempty" form:"currencyCode,omitempty"`
 	MotoInd     *int    `json:"motoInd,omitempty"`
-	Installment *int    `json:"installCount,omitempty"`
+	Installment *int    `json:"installCount,omitempty" form:"installCount,omitempty"`
 	AuthCode    *string `json:"authCode,omitempty"`
 	Rrn         *string `json:"rrn,omitempty"`
 	BatchNumber *int    `json:"batchNumber,omitempty"`
@@ -283,6 +287,65 @@ type float float32
 
 func (f float) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("%.2f", float32(f))), nil
+}
+
+func String(v reflect.Value) string {
+	for v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return ""
+		}
+		v = v.Elem()
+	}
+	return fmt.Sprint(v.Interface())
+}
+
+func QueryString(v interface{}) (url.Values, error) {
+	values := make(url.Values)
+	value := reflect.ValueOf(v)
+	for value.Kind() == reflect.Ptr {
+		if value.IsNil() {
+			return values, nil
+		}
+		value = value.Elem()
+	}
+	if v == nil {
+		return values, nil
+	}
+	err := reflector(values, value)
+	return values, err
+}
+
+func reflector(values url.Values, val reflect.Value) error {
+	typ := val.Type()
+	for i := 0; i < typ.NumField(); i++ {
+		sf := typ.Field(i)
+		sv := val.Field(i)
+		for sv.Kind() == reflect.Ptr {
+			if sv.IsNil() {
+				break
+			}
+			sv = sv.Elem()
+		}
+		if sv.Kind() == reflect.Struct {
+			if err := reflector(values, sv); err != nil {
+				return err
+			}
+			continue
+		}
+		if n, ok := sf.Tag.Lookup("form"); ok {
+			ts := strings.Split(n, ",")
+			name := ts[0]
+			value := String(sv)
+			if len(ts) > 1 && ts[1] == "omitempty" && value != "" {
+				values.Add(name, value)
+			} else if len(ts) > 1 && ts[1] != "omitempty" {
+				values.Add(name, value)
+			} else if len(ts) == 1 {
+				values.Add(name, value)
+			}
+		}
+	}
+	return nil
 }
 
 func Api(merchantid, terminalid, secretkey string) (*API, *Request) {
@@ -462,4 +525,29 @@ func (api *API) Transaction(ctx context.Context, req *Request) (res Response, er
 		}
 	}
 	return res, errors.New("unknown error")
+}
+
+func (api *API) Transaction3D(ctx context.Context, req *Request) (res string, err error) {
+	payload, err := QueryString(req)
+	if err != nil {
+		return res, err
+	}
+	html := []string{}
+	html = append(html, `<!DOCTYPE html>`)
+	html = append(html, `<html>`)
+	html = append(html, `<head>`)
+	html = append(html, `<meta http-equiv="Content-Type" content="text/html; charset=utf-8">`)
+	html = append(html, `<script type="text/javascript">function submitonload() {document.payment.submit();document.getElementById('button').remove();document.getElementById('body').insertAdjacentHTML("beforeend", "Lütfen bekleyiniz...");}</script>`)
+	html = append(html, `</head>`)
+	html = append(html, `<body onload="javascript:submitonload();" id="body" style="text-align:center;margin:10px;font-family:Arial;font-weight:bold;">`)
+	html = append(html, `<form action="`+EndPoints[api.Mode+"3D"]+`" method="post" name="payment">`)
+	for k := range payload {
+		html = append(html, `<input type="hidden" name="`+k+`" value="`+payload.Get(k)+`">`)
+	}
+	html = append(html, `<input type="submit" value="Gönder" id="button">`)
+	html = append(html, `</form>`)
+	html = append(html, `</body>`)
+	html = append(html, `</html>`)
+	res = base64.StdEncoding.EncodeToString([]byte(strings.Join(html, "\n")))
+	return res, err
 }
