@@ -530,7 +530,7 @@ func (api *API) Auth3D(ctx context.Context, req *Request) (Response, error) {
 func (api *API) PreAuth3Dhtml(ctx context.Context, req *Request) (string, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
 	rnd := api.Random(128)
-	code := "1004"
+	code := "3004"
 	model := "3D"
 	req.PaymentModel = &model
 	req.RequestDateTime = &date
@@ -544,7 +544,7 @@ func (api *API) PreAuth3Dhtml(ctx context.Context, req *Request) (string, error)
 func (api *API) Auth3Dhtml(ctx context.Context, req *Request) (string, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
 	rnd := api.Random(128)
-	code := "1000"
+	code := "3000"
 	model := "3D"
 	req.PaymentModel = &model
 	req.RequestDateTime = &date
