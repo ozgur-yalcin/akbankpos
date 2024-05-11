@@ -368,11 +368,11 @@ func (req *Request) SetInstallment(installment int) {
 	req.Transaction.Installment = &installment
 }
 
-func (req *Request) SetIPv4(ipaddress string) {
+func (req *Request) SetCustomerIPv4(ipaddress string) {
 	req.Customer.IpAddress = &ipaddress
 }
 
-func (req *Request) SetEmailAddress(email string) {
+func (req *Request) SetCustomerEmail(email string) {
 	req.Customer.EmailAddress = &email
 }
 
