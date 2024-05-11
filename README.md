@@ -39,11 +39,14 @@ const (
 func main() {
 	api, req := akbankpos.Api(merchantid, terminalid, secretkey)
 	api.SetMode(envmode)
+
 	req.SetCardNumber("5218076007402834") // Kart numarası (zorunlu)
 	req.SetCardExpiry("11", "40")         // Son kullanma tarihi - AA,YY (zorunlu)
 	req.SetCardCode("820")                // Kart arkasındaki 3 haneli numara (zorunlu)
 	req.SetAmount("1.00", "TRY")          // Satış tutarı ve para birimi (zorunlu)
 	req.SetInstallment("1")               // Taksit sayısı (zorunlu)
+
+	// Satış
 	ctx := context.Background()
 	if res, err := api.Auth(ctx, req); err == nil {
 		pretty, _ := json.MarshalIndent(res, " ", " ")
