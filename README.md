@@ -39,11 +39,11 @@ const (
 func main() {
 	api, req := akbankpos.Api(merchantid, terminalid, secretkey)
 	api.SetMode(envmode)
-	req.SetCardNumber("4355093000315232")   // Kart numarası (zorunlu)
-	req.SetCardExpiry("11", "35")           // Son kullanma tarihi - AA,YY (zorunlu)
-	req.SetCardCode("665")                  // Kart arkasındaki 3 haneli numara (zorunlu)
-	req.SetAmount(1.00, "TRY")              // Satış tutarı ve para birimi (zorunlu)
-	req.SetInstallment(1)                   // Taksit sayısı (zorunlu)
+	req.SetCardNumber("4355093000315232") // Kart numarası (zorunlu)
+	req.SetCardExpiry("11", "35")         // Son kullanma tarihi - AA,YY (zorunlu)
+	req.SetCardCode("665")                // Kart arkasındaki 3 haneli numara (zorunlu)
+	req.SetAmount("1.00", "TRY")          // Satış tutarı ve para birimi (zorunlu)
+	req.SetInstallment("1")               // Taksit sayısı (zorunlu)
 	ctx := context.Background()
 	if res, err := api.Auth(ctx, req); err == nil {
 		pretty, _ := json.MarshalIndent(res, " ", " ")
@@ -84,7 +84,7 @@ func main() {
 	api, req := akbankpos.Api(merchantid, terminalid, secretkey)
 	api.SetMode(envmode)
 
-	req.SetAmount(1.00, "TRY")                             // İade tutarı ve para birimi (zorunlu)
+	req.SetAmount("1.00", "TRY")                           // İade tutarı ve para birimi (zorunlu)
 	req.SetOrderId("01c4eb0e-5ae4-456b-8111-33e2209f4276") // Sipariş numarası (zorunlu)
 
 	// İade
@@ -128,7 +128,7 @@ func main() {
 	api, req := akbankpos.Api(merchantid, terminalid, secretkey)
 	api.SetMode(envmode)
 
-	req.SetAmount(1.00, "TRY")                             // İptal tutarı ve para birimi (zorunlu)
+	req.SetAmount("1.00", "TRY")                           // İptal tutarı ve para birimi (zorunlu)
 	req.SetOrderId("01c4eb0e-5ae4-456b-8111-33e2209f4276") // Sipariş numarası (zorunlu)
 
 	// İptal
