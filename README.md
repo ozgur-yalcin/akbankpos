@@ -45,7 +45,6 @@ func main() {
 	req.SetAmount(1.00, "TRY")              // Satış tutarı ve para birimi (zorunlu)
 	req.SetInstallment(1)                   // Taksit sayısı (zorunlu)
 	req.SetCustomerIPv4("192.168.1.1")      // Müşteri IPv4 adresi (zorunlu)
-	req.SetCustomerEmail("test@akbank.com") // Müşteri e-posta adresi (varsa)
 	ctx := context.Background()
 	if res, err := api.Auth(ctx, req); err == nil {
 		pretty, _ := json.MarshalIndent(res, " ", " ")
@@ -86,8 +85,9 @@ func main() {
 	api, req := akbankpos.Api(merchantid, terminalid, secretkey)
 	api.SetMode(envmode)
 
-	req.SetAmount(1.00, "TRY") // İade tutarı ve para birimi (zorunlu)
-	req.SetOrderId("ORDER-")   // Sipariş numarası (zorunlu)
+	req.SetAmount(1.00, "TRY")              // İade tutarı ve para birimi (zorunlu)
+	req.SetOrderId("ORDER-")                // Sipariş numarası (zorunlu)
+	req.SetCustomerIPv4("192.168.1.1")      // Müşteri IPv4 adresi (zorunlu)
 
 	// İade
 	ctx := context.Background()
@@ -130,8 +130,9 @@ func main() {
 	api, req := akbankpos.Api(merchantid, terminalid, secretkey)
 	api.SetMode(envmode)
 
-	req.SetAmount(1.00, "TRY") // İptal tutarı ve para birimi (zorunlu)
-	req.SetOrderId("ORDER-") // Sipariş numarası (zorunlu)
+	req.SetAmount(1.00, "TRY")              // İptal tutarı ve para birimi (zorunlu)
+	req.SetOrderId("ORDER-")                // Sipariş numarası (zorunlu)
+	req.SetCustomerIPv4("192.168.1.1")      // Müşteri IPv4 adresi (zorunlu)
 
 	// İptal
 	ctx := context.Background()
