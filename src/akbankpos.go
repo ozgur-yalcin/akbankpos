@@ -36,6 +36,14 @@ var CurrencyCode = map[string]int{
 	"JPY": 392,
 }
 
+var CurrencyISO = map[string]string{
+	"949": "TRY",
+	"840": "USD",
+	"978": "EUR",
+	"826": "GBP",
+	"392": "JPY",
+}
+
 type API struct {
 	Mode      string
 	SecretKey string
@@ -360,6 +368,19 @@ func Api(merchantid, terminalid, secretkey string) (*API, *Request) {
 	return api, req
 }
 
+func B64(data string) (hash string) {
+	hash = base64.StdEncoding.EncodeToString([]byte(data))
+	return hash
+}
+
+func D64(data string) []byte {
+	b, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		return nil
+	}
+	return b
+}
+
 func (api *API) Hash(payload []byte) string {
 	hmac := hmac.New(sha512.New, []byte(api.SecretKey))
 	hmac.Write(payload)
@@ -604,6 +625,6 @@ func (api *API) Transaction3D(ctx context.Context, req *Request) (res string, er
 	html = append(html, `</form>`)
 	html = append(html, `</body>`)
 	html = append(html, `</html>`)
-	res = base64.StdEncoding.EncodeToString([]byte(strings.Join(html, "\n")))
+	res = B64(strings.Join(html, "\n"))
 	return res, err
 }
