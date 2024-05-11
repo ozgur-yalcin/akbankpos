@@ -34,10 +34,8 @@ var CurrencyCode = map[string]int{
 }
 
 type API struct {
-	Mode       string
-	MerchantId string
-	TerminalId string
-	SecretKey  string
+	Mode      string
+	SecretKey string
 }
 
 type Request struct {
@@ -287,31 +285,13 @@ func (f float) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("%.2f", float32(f))), nil
 }
 
-func Random(n int) string {
-	const alphanum = "0123456789ABCDEF"
-	var bytes = make([]byte, n)
-	source := rand.NewSource(time.Now().UnixNano())
-	rand := rand.New(source)
-	rand.Read(bytes)
-	for i, b := range bytes {
-		bytes[i] = alphanum[b%byte(len(alphanum))]
-	}
-	return string(bytes)
-}
-
 func Api(merchantid, terminalid, secretkey string) (*API, *Request) {
 	api := new(API)
-	api.MerchantId = merchantid
-	api.TerminalId = terminalid
 	api.SecretKey = secretkey
-	req := new(Request)
-	req.Terminal = new(Terminal)
-	req.Card = new(Card)
-	req.Transaction = new(Transaction)
-	req.Customer = new(Customer)
-	req.Reward = new(Reward)
 	version := "1.00"
+	req := new(Request)
 	req.Version = &version
+	req.Terminal = new(Terminal)
 	req.Terminal.MerchantSafeId = &merchantid
 	req.Terminal.TerminalSafeId = &terminalid
 	return api, req
@@ -323,50 +303,86 @@ func (api *API) Hash(payload []byte) string {
 	return base64.StdEncoding.EncodeToString(hmac.Sum(nil))
 }
 
+func (api *API) Random(n int) string {
+	const alphanum = "0123456789ABCDEF"
+	var bytes = make([]byte, n)
+	source := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(source)
+	rand.Read(bytes)
+	for i, b := range bytes {
+		bytes[i] = alphanum[b%byte(len(alphanum))]
+	}
+	return string(bytes)
+}
+
 func (api *API) SetMode(mode string) {
 	api.Mode = mode
 }
 
 func (req *Request) SetCardNumber(cardnumber string) {
+	if req.Card == nil {
+		req.Card = new(Card)
+	}
 	req.Card.CardNumber = &cardnumber
 }
 
 func (req *Request) SetCardExpiry(cardmonth, cardyear string) {
+	if req.Card == nil {
+		req.Card = new(Card)
+	}
 	cardexpiry := cardmonth + cardyear
 	req.Card.CardExpiry = &cardexpiry
 }
 
 func (req *Request) SetCardCode(cardcode string) {
+	if req.Card == nil {
+		req.Card = new(Card)
+	}
 	req.Card.CardCode = &cardcode
 }
 
 func (req *Request) SetAmount(amount float, currency string) {
+	if req.Transaction == nil {
+		req.Transaction = new(Transaction)
+	}
 	motoInd := 0
 	code := CurrencyCode[currency]
-	req.Transaction.MotoInd = &motoInd
 	req.Transaction.Amount = &amount
 	req.Transaction.Currency = &code
+	req.Transaction.MotoInd = &motoInd
 }
 
 func (req *Request) SetInstallment(installment int) {
+	if req.Transaction == nil {
+		req.Transaction = new(Transaction)
+	}
 	req.Transaction.Installment = &installment
 }
 
 func (req *Request) SetCustomerIPv4(ipaddress string) {
+	if req.Customer == nil {
+		req.Customer = new(Customer)
+	}
 	req.Customer.IpAddress = &ipaddress
 }
 
 func (req *Request) SetCustomerEmail(email string) {
+	if req.Customer == nil {
+		req.Customer = new(Customer)
+	}
 	req.Customer.EmailAddress = &email
 }
 
 func (req *Request) SetOrderId(orderid string) {
+	if req.Order == nil {
+		req.Order = new(Order)
+	}
 	req.Order.OrderId = &orderid
 }
 
 func (api *API) PreAuth(ctx context.Context, req *Request) (Response, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
-	rnd := Random(128)
+	rnd := api.Random(128)
 	txnCode := "1004"
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
@@ -376,11 +392,12 @@ func (api *API) PreAuth(ctx context.Context, req *Request) (Response, error) {
 
 func (api *API) Auth(ctx context.Context, req *Request) (Response, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
-	rnd := Random(128)
+	rnd := api.Random(128)
 	txnCode := "1000"
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
 	req.TxnCode = &txnCode
+	req.Reward = new(Reward)
 	req.Reward.CcbRewardAmount = new(float)
 	req.Reward.PcbRewardAmount = new(float)
 	req.Reward.XcbRewardAmount = new(float)
@@ -389,7 +406,7 @@ func (api *API) Auth(ctx context.Context, req *Request) (Response, error) {
 
 func (api *API) PostAuth(ctx context.Context, req *Request) (Response, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
-	rnd := Random(128)
+	rnd := api.Random(128)
 	txnCode := "1005"
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
@@ -399,7 +416,7 @@ func (api *API) PostAuth(ctx context.Context, req *Request) (Response, error) {
 
 func (api *API) Refund(ctx context.Context, req *Request) (Response, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
-	rnd := Random(128)
+	rnd := api.Random(128)
 	txnCode := "1002"
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
@@ -409,7 +426,7 @@ func (api *API) Refund(ctx context.Context, req *Request) (Response, error) {
 
 func (api *API) Cancel(ctx context.Context, req *Request) (Response, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
-	rnd := Random(128)
+	rnd := api.Random(128)
 	txnCode := "1003"
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
