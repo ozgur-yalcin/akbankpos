@@ -1,17 +1,33 @@
 package akbankpos
 
 import (
+	"bytes"
+	"context"
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
+	"errors"
 	"log"
 	"math/rand"
+	"net/http"
 	"time"
 )
 
 var EndPoints = map[string]string{
 	"TEST": "https://apitest.akbank.com",
 	"PROD": "https://api.akbank.com",
+}
+
+var CurrencyCode = map[string]int{
+	"TRY": 949,
+	"YTL": 949,
+	"TRL": 949,
+	"TL":  949,
+	"USD": 840,
+	"EUR": 978,
+	"GBP": 826,
+	"JPY": 392,
 }
 
 type API struct {
@@ -77,6 +93,7 @@ type Response struct {
 	LinkDetail               *LinkDetail           `json:"linkDetail,omitempty"`
 	InstallmentConditionList []*InstallmentCond    `json:"installmentConditionList,omitempty"`
 	TxnDetailList            []*TxnDetailListInner `json:"txnDetailList,omitempty"`
+	Error                    *Error                `json:"error,omitempty"`
 }
 
 type B2b struct {
@@ -118,10 +135,10 @@ type PlannedDate struct {
 }
 
 type Recurring struct {
-	NumberOfPayments  *int32  `json:"numberOfPayments,omitempty"`
-	FrequencyInterval *int32  `json:"frequencyInterval,omitempty"`
+	NumberOfPayments  *int    `json:"numberOfPayments,omitempty"`
+	FrequencyInterval *int    `json:"frequencyInterval,omitempty"`
 	FrequencyCycle    *string `json:"frequencyCycle,omitempty"`
-	RecurringOrder    *int32  `json:"recurringOrder,omitempty"`
+	RecurringOrder    *int    `json:"recurringOrder,omitempty"`
 }
 
 type SecureTransaction struct {
@@ -145,9 +162,9 @@ type Terminal struct {
 }
 
 type Campaign struct {
-	AdditionalInstallment *int32  `json:"additionalInstallCount,omitempty"`
+	AdditionalInstallment *int    `json:"additionalInstallCount,omitempty"`
 	DeferingDate          *string `json:"deferingDate,omitempty"`
-	DeferingMonth         *int32  `json:"deferingMonth,omitempty"`
+	DeferingMonth         *int    `json:"deferingMonth,omitempty"`
 }
 
 type Header struct {
@@ -172,7 +189,7 @@ type LinkDetail struct {
 	Email             *string  `json:"email,omitempty"`
 	LinkValidTerm     *float32 `json:"linkValidTerm,omitempty"`
 	Amount            *float32 `json:"amount,omitempty"`
-	Currency          *int32   `json:"currencyCode,omitempty"`
+	Currency          *int     `json:"currencyCode,omitempty"`
 	InstallmentCount  *float32 `json:"installmentCount,omitempty"`
 	ReferenceId       *string  `json:"referenceId,omitempty"`
 	ErrorCode         *string  `json:"errorCode,omitempty"`
@@ -199,13 +216,13 @@ type Reward struct {
 
 type Transaction struct {
 	Amount      *float32 `json:"amount,omitempty"`
-	Currency    *int32   `json:"currencyCode,omitempty"`
-	MotoInd     *int32   `json:"motoInd,omitempty"`
-	Installment *int32   `json:"installCount,omitempty"`
+	Currency    *int     `json:"currencyCode,omitempty"`
+	MotoInd     *int     `json:"motoInd,omitempty"`
+	Installment *int     `json:"installCount,omitempty"`
 	AuthCode    *string  `json:"authCode,omitempty"`
 	Rrn         *string  `json:"rrn,omitempty"`
-	BatchNumber *int32   `json:"batchNumber,omitempty"`
-	Stan        *int32   `json:"stan,omitempty"`
+	BatchNumber *int     `json:"batchNumber,omitempty"`
+	Stan        *int     `json:"stan,omitempty"`
 }
 
 type TxnDetailListInner struct {
@@ -222,14 +239,14 @@ type TxnDetailListInner struct {
 	OrderTrackId               *string  `json:"orderTrackId,omitempty"`
 	AuthCode                   *string  `json:"authCode,omitempty"`
 	Rrn                        *string  `json:"rrn,omitempty"`
-	BatchNumber                *int32   `json:"batchNumber,omitempty"`
-	Stan                       *int32   `json:"stan,omitempty"`
+	BatchNumber                *int     `json:"batchNumber,omitempty"`
+	Stan                       *int     `json:"stan,omitempty"`
 	SettlementId               *string  `json:"settlementId,omitempty"`
 	TxnStatus                  *string  `json:"txnStatus,omitempty"`
 	Amount                     *float32 `json:"amount,omitempty"`
-	Currency                   *int32   `json:"currencyCode,omitempty"`
-	MotoInd                    *int32   `json:"motoInd,omitempty"`
-	Installment                *int32   `json:"installCount,omitempty"`
+	Currency                   *int     `json:"currencyCode,omitempty"`
+	MotoInd                    *int     `json:"motoInd,omitempty"`
+	Installment                *int     `json:"installCount,omitempty"`
 	CcbRewardAmount            *float32 `json:"ccbRewardAmount,omitempty"`
 	PcbRewardAmount            *float32 `json:"pcbRewardAmount,omitempty"`
 	XcbRewardAmount            *float32 `json:"xcbRewardAmount,omitempty"`
@@ -238,11 +255,11 @@ type TxnDetailListInner struct {
 	PreAuthPartialCancelAmount *float32 `json:"preAuthPartialCancelAmount,omitempty"`
 	PreAuthCloseDate           *string  `json:"preAuthCloseDate,omitempty"`
 	MaskedCardNumber           *string  `json:"maskedCardNumber,omitempty"`
-	RecurringOrder             *int32   `json:"recurringOrder,omitempty"`
+	RecurringOrder             *int     `json:"recurringOrder,omitempty"`
 	RequestType                *string  `json:"requestType,omitempty"`
 	RequestStatus              *string  `json:"requestStatus,omitempty"`
 	CancelDate                 *string  `json:"cancelDate,omitempty"`
-	TryCount                   *int32   `json:"tryCount,omitempty"`
+	TryCount                   *int     `json:"tryCount,omitempty"`
 	Xid                        *string  `json:"xid,omitempty"`
 	PaymentModel               *string  `json:"paymentModel,omitempty"`
 	Eci                        *string  `json:"eci,omitempty"`
@@ -309,10 +326,134 @@ func Api(merchantid, terminalid, secretkey string) (*API, *Request) {
 	api.MerchantId = merchantid
 	api.TerminalId = terminalid
 	api.SecretKey = secretkey
-	request := new(Request)
-	return api, request
+	req := new(Request)
+	req.Terminal = new(Terminal)
+	req.Card = new(Card)
+	req.Transaction = new(Transaction)
+	req.Customer = new(Customer)
+	req.Reward = new(Reward)
+	version := "1.0"
+	req.Version = &version
+	req.Terminal.MerchantSafeId = &merchantid
+	req.Terminal.TerminalSafeId = &terminalid
+	return api, req
 }
 
 func (api *API) SetMode(mode string) {
 	api.Mode = mode
+}
+
+func (req *Request) SetCardNumber(cardnumber string) {
+	req.Card.CardNumber = &cardnumber
+}
+
+func (req *Request) SetCardExpiry(cardexpiry string) {
+	req.Card.CardExpiry = &cardexpiry
+}
+
+func (req *Request) SetCardCode(cardcode string) {
+	req.Card.CardCode = &cardcode
+}
+
+func (req *Request) SetAmount(amount float32, currency string) {
+	motoInd := 0
+	code := CurrencyCode[currency]
+	req.Transaction.MotoInd = &motoInd
+	req.Transaction.Amount = &amount
+	req.Transaction.Currency = &code
+}
+
+func (req *Request) SetInstallment(installment int) {
+	req.Transaction.Installment = &installment
+}
+
+func (req *Request) SetIPv4(ipaddress string) {
+	req.Customer.IpAddress = &ipaddress
+}
+
+func (req *Request) SetEmailAddress(email string) {
+	req.Customer.EmailAddress = &email
+}
+
+func (req *Request) SetOrderId(orderid string) {
+	req.Order.OrderId = &orderid
+}
+
+func (api *API) PreAuth(ctx context.Context, req *Request) (Response, error) {
+	date := time.Now().Format("2006-01-02T15:04:05.000")
+	rnd := Random(128)
+	txnCode := "1004"
+	req.RequestDateTime = &date
+	req.RandomNumber = &rnd
+	req.TxnCode = &txnCode
+	return api.Transaction(ctx, req)
+}
+
+func (api *API) Auth(ctx context.Context, req *Request) (Response, error) {
+	date := time.Now().Format("2006-01-02T15:04:05.000")
+	rnd := Random(128)
+	txnCode := "1000"
+	req.RequestDateTime = &date
+	req.RandomNumber = &rnd
+	req.TxnCode = &txnCode
+	return api.Transaction(ctx, req)
+}
+
+func (api *API) PostAuth(ctx context.Context, req *Request) (Response, error) {
+	date := time.Now().Format("2006-01-02T15:04:05.000")
+	rnd := Random(128)
+	txnCode := "1005"
+	req.RequestDateTime = &date
+	req.RandomNumber = &rnd
+	req.TxnCode = &txnCode
+	return api.Transaction(ctx, req)
+}
+
+func (api *API) Refund(ctx context.Context, req *Request) (Response, error) {
+	date := time.Now().Format("2006-01-02T15:04:05.000")
+	rnd := Random(128)
+	txnCode := "1002"
+	req.RequestDateTime = &date
+	req.RandomNumber = &rnd
+	req.TxnCode = &txnCode
+	return api.Transaction(ctx, req)
+}
+
+func (api *API) Cancel(ctx context.Context, req *Request) (Response, error) {
+	date := time.Now().Format("2006-01-02T15:04:05.000")
+	rnd := Random(128)
+	txnCode := "1003"
+	req.RequestDateTime = &date
+	req.RandomNumber = &rnd
+	req.TxnCode = &txnCode
+	return api.Transaction(ctx, req)
+}
+
+func (api *API) Transaction(ctx context.Context, req *Request) (res Response, err error) {
+	payload, err := json.Marshal(req)
+	if err != nil {
+		return res, err
+	}
+	request, err := http.NewRequestWithContext(ctx, "POST", EndPoints[api.Mode]+"/api/v1/payment/virtualpos/transaction/process", bytes.NewReader(payload))
+	if err != nil {
+		return res, err
+	}
+	request.Header.Set("Content-Type", "application/json; charset=utf-8")
+	client := new(http.Client)
+	response, err := client.Do(request)
+	if err != nil {
+		return res, err
+	}
+	defer response.Body.Close()
+	decoder := json.NewDecoder(response.Body)
+	if response.StatusCode == http.StatusOK {
+		if err := decoder.Decode(&res); err != nil {
+			return res, nil
+		}
+	} else {
+		if err := decoder.Decode(&res.Error); err != nil {
+			return res, errors.New(res.Error.Message)
+		}
+	}
+	return res, errors.New("unknown error")
 }
