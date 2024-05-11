@@ -130,6 +130,7 @@ func main() {
 	api, req := akbankpos.Api(merchantid, terminalid, secretkey)
 	api.SetMode(envmode)
 
+	req.SetAmount(1.00, "TRY") // İptal tutarı ve para birimi (zorunlu)
 	req.SetOrderId("ORDER-") // Sipariş numarası (zorunlu)
 
 	// İptal
