@@ -1,5 +1,14 @@
 package akbankpos
 
+import (
+	"crypto/sha512"
+	"encoding/base64"
+	"encoding/hex"
+	"log"
+	"math/rand"
+	"time"
+)
+
 type Request struct {
 	Version           *string            `json:"version,omitempty"`
 	HashItems         *string            `json:"hashItems,omitempty"`
@@ -227,4 +236,58 @@ type TxnDetailListInner struct {
 	Eci                        *string  `json:"eci,omitempty"`
 	SecureData                 *string  `json:"secureData,omitempty"`
 	OrgOrderId                 *string  `json:"orgOrderId,omitempty"`
+}
+
+type Error struct {
+	Code    string   `json:"code,omitempty"`
+	Message string   `json:"message,omitempty"`
+	Errors  []Errors `json:"errors,omitempty"`
+}
+
+type Errors struct {
+	Code    string `json:"code,omitempty"`
+	Message string `json:"message,omitempty"`
+}
+
+func Random(n int) string {
+	const alphanum = "0123456789ABCDEF"
+	var bytes = make([]byte, n)
+	source := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(source)
+	rand.Read(bytes)
+	for i, b := range bytes {
+		bytes[i] = alphanum[b%byte(len(alphanum))]
+	}
+	return string(bytes)
+}
+
+func HEX(data string) (hash string) {
+	b, err := hex.DecodeString(data)
+	if err != nil {
+		log.Println(err)
+		return hash
+	}
+	hash = string(b)
+	return hash
+}
+
+func SHA512(data string) (hash string) {
+	h := sha512.New()
+	h.Write([]byte(data))
+	hash = hex.EncodeToString(h.Sum(nil))
+	return hash
+}
+
+func B64(data string) (hash string) {
+	hash = base64.StdEncoding.EncodeToString([]byte(data))
+	return hash
+}
+
+func D64(data string) []byte {
+	b, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return b
 }
