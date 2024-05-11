@@ -299,12 +299,6 @@ func Random(n int) string {
 	return string(bytes)
 }
 
-func Hash(payload []byte, secretkey string) string {
-	hmac := hmac.New(sha512.New, []byte(secretkey))
-	hmac.Write(payload)
-	return base64.StdEncoding.EncodeToString(hmac.Sum(nil))
-}
-
 func Api(merchantid, terminalid, secretkey string) (*API, *Request) {
 	api := new(API)
 	api.MerchantId = merchantid
@@ -321,6 +315,12 @@ func Api(merchantid, terminalid, secretkey string) (*API, *Request) {
 	req.Terminal.MerchantSafeId = &merchantid
 	req.Terminal.TerminalSafeId = &terminalid
 	return api, req
+}
+
+func (api *API) Hash(payload []byte) string {
+	hmac := hmac.New(sha512.New, []byte(api.SecretKey))
+	hmac.Write(payload)
+	return base64.StdEncoding.EncodeToString(hmac.Sum(nil))
 }
 
 func (api *API) SetMode(mode string) {
@@ -427,7 +427,7 @@ func (api *API) Transaction(ctx context.Context, req *Request) (res Response, er
 		return res, err
 	}
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("auth-hash", Hash(payload, api.SecretKey))
+	request.Header.Set("auth-hash", api.Hash(payload))
 	client := new(http.Client)
 	response, err := client.Do(request)
 	if err != nil {
