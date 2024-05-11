@@ -398,30 +398,11 @@ func (api *API) Hash(payload []byte) string {
 	return base64.StdEncoding.EncodeToString(hmac.Sum(nil))
 }
 
-func (api *API) Hash3D(req url.Values) string {
+func (api *API) Hash3D(req url.Values, params []string) string {
 	items := []string{}
-	items = append(items, req.Get("paymentModel"))
-	items = append(items, req.Get("txnCode"))
-	items = append(items, req.Get("merchantSafeId"))
-	items = append(items, req.Get("terminalSafeId"))
-	items = append(items, req.Get("orderId"))
-	items = append(items, req.Get("lang"))
-	items = append(items, req.Get("amount"))
-	items = append(items, req.Get("ccbRewardAmount"))
-	items = append(items, req.Get("pcbRewardAmount"))
-	items = append(items, req.Get("xcbRewardAmount"))
-	items = append(items, req.Get("currencyCode"))
-	items = append(items, req.Get("installCount"))
-	items = append(items, req.Get("okUrl"))
-	items = append(items, req.Get("failUrl"))
-	items = append(items, req.Get("emailAddress"))
-	items = append(items, req.Get("subMerchantId"))
-	items = append(items, req.Get("creditCard"))
-	items = append(items, req.Get("expiredDate"))
-	items = append(items, req.Get("cvv"))
-	items = append(items, req.Get("randomNumber"))
-	items = append(items, req.Get("requestDateTime"))
-	items = append(items, req.Get("b2bIdentityNumber"))
+	for _, param := range params {
+		items = append(items, req.Get(param))
+	}
 	plain := strings.Join(items, "")
 	return api.Hash([]byte(plain))
 }
@@ -565,7 +546,8 @@ func (api *API) PreAuth3Dhtml(ctx context.Context, req *Request) (string, error)
 	req.RandomNumber = &rnd
 	req.TxnCode = &code
 	payload, _ := QueryString(req)
-	hash := api.Hash3D(payload)
+	params := []string{"paymentModel", "txnCode", "merchantSafeId", "terminalSafeId", "orderId", "lang", "amount", "ccbRewardAmount", "pcbRewardAmount", "xcbRewardAmount", "currencyCode", "installCount", "okUrl", "failUrl", "emailAddress", "subMerchantId", "creditCard", "expiredDate", "cvv", "randomNumber", "requestDateTime", "b2bIdentityNumber"}
+	hash := api.Hash3D(payload, params)
 	req.Hash = &hash
 	return api.Transaction3D(ctx, req)
 }
@@ -584,7 +566,8 @@ func (api *API) Auth3Dhtml(ctx context.Context, req *Request) (string, error) {
 	req.Reward.PcbRewardAmount = new(float)
 	req.Reward.XcbRewardAmount = new(float)
 	payload, _ := QueryString(req)
-	hash := api.Hash3D(payload)
+	params := []string{"paymentModel", "txnCode", "merchantSafeId", "terminalSafeId", "orderId", "lang", "amount", "ccbRewardAmount", "pcbRewardAmount", "xcbRewardAmount", "currencyCode", "installCount", "okUrl", "failUrl", "emailAddress", "subMerchantId", "creditCard", "expiredDate", "cvv", "randomNumber", "requestDateTime", "b2bIdentityNumber"}
+	hash := api.Hash3D(payload, params)
 	req.Hash = &hash
 	return api.Transaction3D(ctx, req)
 }
