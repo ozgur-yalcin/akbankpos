@@ -15,8 +15,11 @@ import (
 )
 
 var EndPoints = map[string]string{
-	"TEST": "https://apitest.akbank.com",
-	"PROD": "https://api.akbank.com",
+	"TEST":   "https://apitest.akbank.com",
+	"TEST3D": "https://virtualpospaymentgatewaypre.akbank.com/securepay",
+
+	"PROD":   "https://api.akbank.com",
+	"PROD3D": "https://virtualpospaymentgateway.akbank.com/securepay",
 }
 
 var CurrencyCode = map[string]int{
