@@ -366,6 +366,10 @@ func (api *API) Hash(payload []byte) string {
 	return base64.StdEncoding.EncodeToString(hmac.Sum(nil))
 }
 
+func (api *API) Hash3D(req *Request) string {
+	return ""
+}
+
 func (api *API) Random(n int) string {
 	const alphanum = "0123456789ABCDEF"
 	var bytes = make([]byte, n)
@@ -465,6 +469,58 @@ func (api *API) Auth(ctx context.Context, req *Request) (Response, error) {
 	req.Reward.PcbRewardAmount = new(float)
 	req.Reward.XcbRewardAmount = new(float)
 	return api.Transaction(ctx, req)
+}
+
+func (api *API) PreAuth3D(ctx context.Context, req *Request) (Response, error) {
+	date := time.Now().Format("2006-01-02T15:04:05.000")
+	rnd := api.Random(128)
+	code := "1004"
+	req.RequestDateTime = &date
+	req.RandomNumber = &rnd
+	req.TxnCode = &code
+	return api.Transaction(ctx, req)
+}
+
+func (api *API) Auth3D(ctx context.Context, req *Request) (Response, error) {
+	date := time.Now().Format("2006-01-02T15:04:05.000")
+	rnd := api.Random(128)
+	code := "1000"
+	req.RequestDateTime = &date
+	req.RandomNumber = &rnd
+	req.TxnCode = &code
+	req.Reward = new(Reward)
+	req.Reward.CcbRewardAmount = new(float)
+	req.Reward.PcbRewardAmount = new(float)
+	req.Reward.XcbRewardAmount = new(float)
+	return api.Transaction(ctx, req)
+}
+
+func (api *API) PreAuth3Dhtml(ctx context.Context, req *Request) (string, error) {
+	date := time.Now().Format("2006-01-02T15:04:05.000")
+	rnd := api.Random(128)
+	code := "1004"
+	req.RequestDateTime = &date
+	req.RandomNumber = &rnd
+	req.TxnCode = &code
+	hash := api.Hash3D(req)
+	req.Hash = &hash
+	return api.Transaction3D(ctx, req)
+}
+
+func (api *API) Auth3Dhtml(ctx context.Context, req *Request) (string, error) {
+	date := time.Now().Format("2006-01-02T15:04:05.000")
+	rnd := api.Random(128)
+	code := "1000"
+	req.RequestDateTime = &date
+	req.RandomNumber = &rnd
+	req.TxnCode = &code
+	req.Reward = new(Reward)
+	req.Reward.CcbRewardAmount = new(float)
+	req.Reward.PcbRewardAmount = new(float)
+	req.Reward.XcbRewardAmount = new(float)
+	hash := api.Hash3D(req)
+	req.Hash = &hash
+	return api.Transaction3D(ctx, req)
 }
 
 func (api *API) PostAuth(ctx context.Context, req *Request) (Response, error) {
