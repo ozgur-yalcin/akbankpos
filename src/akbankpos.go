@@ -426,6 +426,7 @@ func (api *API) Transaction(ctx context.Context, req *Request) (res Response, er
 	if err != nil {
 		return res, err
 	}
+	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("auth-hash", Hash(payload, api.SecretKey))
 	client := new(http.Client)
 	response, err := client.Do(request)
