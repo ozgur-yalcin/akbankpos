@@ -442,6 +442,10 @@ func (api *API) SetMode(mode string) {
 	api.Mode = mode
 }
 
+func (req *Request) SetLang(lang string) {
+	req.Lang = &lang
+}
+
 func (req *Request) SetCardNumber(cardnumber string) {
 	if req.Card == nil {
 		req.Card = new(Card)
