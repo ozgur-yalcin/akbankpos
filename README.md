@@ -22,12 +22,18 @@ import (
 	akbankpos "github.com/ozgur-yalcin/akbankpos.go/src"
 )
 
-// Pos bilgileri
 const (
-	envmode    = "TEST"                                                                                                                             // Çalışma ortamı (Production : "PROD" - Test : "TEST")
-	merchantid = "2023090417500272654BD9A49CF07574"                                                                                                 // Mağaza numarası
-	terminalid = "2023090417500284633D137A249DBBEB"                                                                                                 // Terminal numarası
-	secretkey  = "3230323330393034313735303032363031353172675f357637355f3273387373745f7233725f73323333383737335f323272383774767276327672323531355f" // Mağaza anahtarı
+	// Çalışma ortamı (Production : "PROD" - Test : "TEST")
+	envmode = "TEST"
+
+	// Mağaza numarası
+	merchantid = "2023090417500272654BD9A49CF07574"
+
+	// Terminal numarası
+	terminalid = "2023090417500284633D137A249DBBEB"
+
+	// Mağaza anahtarı
+	secretkey = "3230323330393034313735303032363031353172675f357637355f3273387373745f7233725f73323333383737335f323272383774767276327672323531355f"
 )
 
 func main() {
