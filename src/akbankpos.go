@@ -75,7 +75,7 @@ type Request struct {
 	SubMerchant       *SubMerchant       `json:"subMerchant,omitempty"`
 	B2B               *B2B               `json:"b2b,omitempty"`
 	SGK               *SGK               `json:"sgk,omitempty"`
-	Hash              *string            `form:"hash,omitempty"`
+	Hash              *string            `json:",omitempty" form:"hash,omitempty"`
 }
 
 type Response struct {
@@ -524,9 +524,11 @@ func (api *API) PreAuth3D(ctx context.Context, req *Request) (Response, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
 	rnd := api.Random(128)
 	code := "1004"
+	motoInd := 0
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
 	req.TxnCode = &code
+	req.Transaction.MotoInd = &motoInd
 	return api.Transaction(ctx, req)
 }
 
@@ -534,9 +536,11 @@ func (api *API) Auth3D(ctx context.Context, req *Request) (Response, error) {
 	date := time.Now().Format("2006-01-02T15:04:05.000")
 	rnd := api.Random(128)
 	code := "1000"
+	motoInd := 0
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
 	req.TxnCode = &code
+	req.Transaction.MotoInd = &motoInd
 	req.Reward = new(Reward)
 	req.Reward.CcbRewardAmount = new(float)
 	req.Reward.PcbRewardAmount = new(float)
