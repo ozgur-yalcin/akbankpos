@@ -429,11 +429,11 @@ func (api *API) Transaction(ctx context.Context, req *Request) (res Response, er
 	defer response.Body.Close()
 	decoder := json.NewDecoder(response.Body)
 	if response.StatusCode == http.StatusOK {
-		if err := decoder.Decode(&res); err != nil {
+		if err := decoder.Decode(&res); err == nil {
 			return res, nil
 		}
 	} else {
-		if err := decoder.Decode(&res.Error); err != nil {
+		if err := decoder.Decode(&res.Error); err == nil {
 			return res, errors.New(res.Error.Message)
 		}
 	}
