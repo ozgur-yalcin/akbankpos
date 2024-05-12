@@ -16,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var EndPoints = map[string]string{
@@ -537,6 +539,11 @@ func (api *API) PreAuth3Dhtml(ctx context.Context, req *Request) (string, error)
 	rnd := api.Random(128)
 	code := "3004"
 	model := "3D"
+	if req.Order == nil {
+		orderid := uuid.New().String()
+		req.Order = new(Order)
+		req.Order.OrderId = &orderid
+	}
 	req.PaymentModel = &model
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
@@ -553,6 +560,11 @@ func (api *API) Auth3Dhtml(ctx context.Context, req *Request) (string, error) {
 	rnd := api.Random(128)
 	code := "3000"
 	model := "3D"
+	if req.Order == nil {
+		orderid := uuid.New().String()
+		req.Order = new(Order)
+		req.Order.OrderId = &orderid
+	}
 	req.PaymentModel = &model
 	req.RequestDateTime = &date
 	req.RandomNumber = &rnd
