@@ -71,35 +71,35 @@ type Request struct {
 }
 
 type Response struct {
-	TxnCode                  *string               `json:"txnCode,omitempty"`
-	ResponseCode             *string               `json:"responseCode,omitempty"`
-	Hash                     *string               `json:"hash,omitempty"`
-	ResponseMessage          *string               `json:"responseMessage,omitempty"`
-	HostResponseCode         *string               `json:"hostResponseCode,omitempty"`
-	HostMessage              *string               `json:"hostMessage,omitempty"`
-	TxnDateTime              *string               `json:"txnDateTime,omitempty"`
-	Terminal                 *Terminal             `json:"terminal,omitempty"`
-	Card                     *Card                 `json:"card,omitempty"`
-	Order                    *Order                `json:"order,omitempty"`
-	Transaction              *Transaction          `json:"transaction,omitempty"`
-	Campaign                 *Campaign             `json:"campaign,omitempty"`
-	Reward                   *Reward               `json:"reward,omitempty"`
-	Recurring                *Recurring            `json:"recurring,omitempty"`
-	PlannedDate              *PlannedDate          `json:"plannedDate,omitempty"`
-	Interest                 *Interest             `json:"interest,omitempty"`
-	SubMerchant              *SubMerchant          `json:"subMerchant,omitempty"`
-	B2B                      *B2B                  `json:"b2b,omitempty"`
-	LinkValidTerm            *float                `json:"linkValidTerm,omitempty"`
-	MerchantId               *float                `json:"merchantId,omitempty"`
-	LinkExpireDate           *string               `json:"linkExpireDate,omitempty"`
-	MerchantOrderId          *string               `json:"merchantOrderId,omitempty"`
-	ReferenceId              *string               `json:"referenceId,omitempty"`
-	Token                    *string               `json:"token,omitempty"`
-	Header                   *Header               `json:"header,omitempty"`
-	LinkDetail               *LinkDetail           `json:"linkDetail,omitempty"`
-	InstallmentConditionList []*InstallmentCond    `json:"installmentConditionList,omitempty"`
-	TxnDetailList            []*TxnDetailListInner `json:"txnDetailList,omitempty"`
-	Error                    *Error                `json:"error,omitempty"`
+	TxnCode          *string        `json:"txnCode,omitempty"`
+	ResponseCode     *string        `json:"responseCode,omitempty"`
+	Hash             *string        `json:"hash,omitempty"`
+	ResponseMessage  *string        `json:"responseMessage,omitempty"`
+	HostResponseCode *string        `json:"hostResponseCode,omitempty"`
+	HostMessage      *string        `json:"hostMessage,omitempty"`
+	TxnDateTime      *string        `json:"txnDateTime,omitempty"`
+	Terminal         *Terminal      `json:"terminal,omitempty"`
+	Card             *Card          `json:"card,omitempty"`
+	Order            *Order         `json:"order,omitempty"`
+	Transaction      *Transaction   `json:"transaction,omitempty"`
+	Campaign         *Campaign      `json:"campaign,omitempty"`
+	Reward           *Reward        `json:"reward,omitempty"`
+	Recurring        *Recurring     `json:"recurring,omitempty"`
+	PlannedDate      *PlannedDate   `json:"plannedDate,omitempty"`
+	Interest         *Interest      `json:"interest,omitempty"`
+	SubMerchant      *SubMerchant   `json:"subMerchant,omitempty"`
+	B2B              *B2B           `json:"b2b,omitempty"`
+	LinkValidTerm    *float         `json:"linkValidTerm,omitempty"`
+	MerchantId       *float         `json:"merchantId,omitempty"`
+	LinkExpireDate   *string        `json:"linkExpireDate,omitempty"`
+	MerchantOrderId  *string        `json:"merchantOrderId,omitempty"`
+	ReferenceId      *string        `json:"referenceId,omitempty"`
+	Token            *string        `json:"token,omitempty"`
+	Header           *Header        `json:"header,omitempty"`
+	LinkDetail       *LinkDetail    `json:"linkDetail,omitempty"`
+	InstallmentList  []*Installment `json:"installmentConditionList,omitempty"`
+	TxnDetailList    []*TxnDetail   `json:"txnDetailList,omitempty"`
+	Error            *Error         `json:"error,omitempty"`
 }
 
 type B2B struct {
@@ -178,7 +178,7 @@ type Header struct {
 	ReturnMessage *string `json:"returnMessage,omitempty"`
 }
 
-type InstallmentCond struct {
+type Installment struct {
 	InstallmentCount *float  `json:"installmentCount,omitempty"`
 	InstallmentType  *string `json:"installmentType,omitempty"`
 	CardType         *string `json:"cardType,omitempty"`
@@ -231,7 +231,7 @@ type Transaction struct {
 	Stan        *int    `json:"stan,omitempty"`
 }
 
-type TxnDetailListInner struct {
+type TxnDetail struct {
 	TxnCode                    *string `json:"txnCode,omitempty"`
 	ResponseCode               *string `json:"responseCode,omitempty"`
 	ResponseMessage            *string `json:"responseMessage,omitempty"`
